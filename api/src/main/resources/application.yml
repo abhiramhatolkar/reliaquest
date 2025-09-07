@@ -1,0 +1,7 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+spring.application.name: employee-api
+server.port: 8111
