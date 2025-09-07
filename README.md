@@ -146,3 +146,20 @@ and style guidelines with every build.
 To resolve any errors, you must run **spotlessApply** task.
 `./gradlew spotlessApply`
 
+### Start API server
+Use command to start the API server `./gradlew api:bootRun`
+
+Check health of the server using spring boot actuator endpoint `http://localhost:8111/actuator/health`
+
+Run APIs from a REST client on `http://localhost:8111/`. Exmaple: `http://localhost:8111/employees`
+
+
+### Run unit tests
+Run command `./gradlew api:test`
+
+### Some of the practices followed
+* User interfaces and imlpementations for controller (already part of the origial repo) and service classes
+* Lombok is used to generate getter, setter, constructors, toStrings etc.
+* Spring boot actuator is used for a basic health check
+* Method calls, arguments and results/ exceptions are logged using spring AOP
+* Caching is done using caffeine
