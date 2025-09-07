@@ -21,6 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
@@ -78,10 +79,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     try {
       List<Employee> employees = getAllEmployees();
-      return employees.stream()
+      List<Employee> filteredEmployees = employees.stream()
               .filter(employee -> employee.getEmployeeName() != null &&
                       employee.getEmployeeName().equalsIgnoreCase(name.trim()))
               .collect(Collectors.toList());
+      if (CollectionUtils.isEmpty(filteredEmployees)) {
+        throw new NotFoundException("No employees available with given name");
+      }
+      return filteredEmployees;
     } catch (Exception e) {
       handleRestClientException("Error searching employees by name: " + name, e);
       return null;
@@ -194,11 +199,11 @@ public class EmployeeServiceImpl implements EmployeeService {
   }
 
   private void handleRestClientException(String message, Exception e) {
-    if (e instanceof HttpClientErrorException.BadRequest) {
+    if (e instanceof HttpClientErrorException.BadRequest || e instanceof BadRequestException) {
       throw new BadRequestException("Bad request: " + e.getMessage(), e);
-    } else if (e instanceof HttpClientErrorException.NotFound) {
+    } else if (e instanceof HttpClientErrorException.NotFound || e instanceof NotFoundException) {
       throw new NotFoundException("Resource not found: " + e.getMessage(), e);
-    } else if (e instanceof HttpServerErrorException) {
+    } else if (e instanceof HttpServerErrorException || e instanceof ServerErrorException) {
       throw new ServerErrorException("Server error: " + e.getMessage(), e);
     } else if (e instanceof RestClientException) {
       throw new ServerErrorException(message, e);
